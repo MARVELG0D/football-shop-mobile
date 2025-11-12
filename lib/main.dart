@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'add_product_page.dart';
 
 void main() {
   runApp(const FootballShopApp());
@@ -34,6 +35,43 @@ class _FootballShopHomeState extends State<FootballShopHome> {
       appBar: AppBar(
         title: const Text('Football Shop'),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+      ),
+      drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            const DrawerHeader(
+              decoration: BoxDecoration(
+                color: Colors.blue,
+              ),
+              child: Text(
+                'Football Shop Menu',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 24,
+                ),
+              ),
+            ),
+            ListTile(
+              leading: const Icon(Icons.home),
+              title: const Text('Halaman Utama'),
+              onTap: () {
+                Navigator.of(context).pop(); // Close the drawer
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.add),
+              title: const Text('Tambah Produk'),
+              onTap: () {
+                Navigator.of(context).pop(); // Close the drawer
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const AddProductPage()),
+                );
+              },
+            ),
+          ],
+        ),
       ),
       body: Center(
         child: Column(
@@ -81,8 +119,9 @@ class _FootballShopHomeState extends State<FootballShopHome> {
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Kamu telah menekan tombol Create Product')),
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const AddProductPage()),
                 );
               },
               style: ElevatedButton.styleFrom(
