@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'dart:convert';
+import 'package:pbp_django_auth/pbp_django_auth.dart';
+import 'package:provider/provider.dart';
+import 'package:football_shop/screens/menu.dart';
 
 class AddProductPage extends StatefulWidget {
   const AddProductPage({super.key});
@@ -26,8 +30,9 @@ class _AddProductPageState extends State<AddProductPage> {
     super.dispose();
   }
 
-  void _saveProduct() {
+  void _saveProduct() async {
     if (_formKey.currentState!.validate()) {
+      final request = context.read<CookieRequest>();
       // Collect data
       final name = _nameController.text;
       final price = double.parse(_priceController.text);
@@ -36,37 +41,33 @@ class _AddProductPageState extends State<AddProductPage> {
       final category = _categoryController.text;
       final isFeatured = _isFeatured;
 
-      // Show dialog with data
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: const Text('Product Saved'),
-            content: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('Name: $name'),
-                  Text('Price: \$${price.toStringAsFixed(2)}'),
-                  Text('Description: $description'),
-                  Text('Thumbnail: $thumbnail'),
-                  Text('Category: $category'),
-                  Text('Is Featured: ${isFeatured ? 'Yes' : 'No'}'),
-                ],
-              ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                  Navigator.of(context).pop(); // Go back to home
-                },
-                child: const Text('OK'),
-              ),
-            ],
-          );
-        },
+      final response = await request.postJson(
+        "http://10.0.2.2:8000/api/products/create/",
+        jsonEncode({
+          "name": name,
+          "price": price,
+          "description": description,
+          "thumbnail": thumbnail,
+          "category": category,
+          "is_featured": isFeatured,
+        }),
       );
+
+      if (context.mounted) {
+        if (response['status'] == 'success') {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Product successfully saved!')),
+          );
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => FootballShopHome()),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Failed to save product!')),
+          );
+        }
+      }
     }
   }
 
