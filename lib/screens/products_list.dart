@@ -43,7 +43,7 @@ class ProductsListPage extends StatefulWidget {
 
 class _ProductsListPageState extends State<ProductsListPage> {
   Future<List<Product>> fetchProducts(CookieRequest request) async {
-    final response = await request.get('http://10.0.2.2:8000/api/products/');
+    final response = await request.get('http://127.0.0.1:8000/api/products/');
     var data = response;
     List<Product> listProducts = [];
     for (var d in data) {

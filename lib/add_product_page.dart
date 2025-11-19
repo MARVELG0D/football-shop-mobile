@@ -13,11 +13,14 @@ class AddProductPage extends StatefulWidget {
 
 class _AddProductPageState extends State<AddProductPage> {
   final _formKey = GlobalKey<FormState>();
+
   final _nameController = TextEditingController();
   final _priceController = TextEditingController();
   final _descriptionController = TextEditingController();
   final _thumbnailController = TextEditingController();
   final _categoryController = TextEditingController();
+  final _stockController = TextEditingController();
+
   bool _isFeatured = false;
 
   @override
@@ -27,47 +30,45 @@ class _AddProductPageState extends State<AddProductPage> {
     _descriptionController.dispose();
     _thumbnailController.dispose();
     _categoryController.dispose();
+    _stockController.dispose();
     super.dispose();
   }
 
-  void _saveProduct() async {
-    if (_formKey.currentState!.validate()) {
-      final request = context.read<CookieRequest>();
-      // Collect data
-      final name = _nameController.text;
-      final price = double.parse(_priceController.text);
-      final description = _descriptionController.text;
-      final thumbnail = _thumbnailController.text;
-      final category = _categoryController.text;
-      final isFeatured = _isFeatured;
+  Future<void> _saveProduct() async {
+    if (!_formKey.currentState!.validate()) return;
 
-      final response = await request.postJson(
-        "http://10.0.2.2:8000/api/products/create/",
-        jsonEncode({
-          "name": name,
-          "price": price,
-          "description": description,
-          "thumbnail": thumbnail,
-          "category": category,
-          "is_featured": isFeatured,
-        }),
+    final request = context.read<CookieRequest>();
+
+    final data = {
+      "name": _nameController.text,
+      "price": int.parse(_priceController.text),
+      "description": _descriptionController.text,
+      "thumbnail": _thumbnailController.text,
+      "category": _categoryController.text,
+      "stock": int.parse(_stockController.text),
+      "is_featured": _isFeatured,
+    };
+
+    final response = await request.postJson(
+      "http://127.0.0.1:8000/api/products/create/",
+      jsonEncode(data),
+    );
+
+    if (!mounted) return;
+
+    if (response['status'] == 'success') {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Product successfully saved!')),
       );
 
-      if (context.mounted) {
-        if (response['status'] == 'success') {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Product successfully saved!')),
-          );
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => FootballShopHome()),
-          );
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Failed to save product!')),
-          );
-        }
-      }
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => FootballShopHome()),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(response['message'] ?? 'Failed to save product!')),
+      );
     }
   }
 
@@ -98,6 +99,7 @@ class _AddProductPageState extends State<AddProductPage> {
                     return null;
                   },
                 ),
+
                 TextFormField(
                   controller: _priceController,
                   decoration: const InputDecoration(labelText: 'Price'),
@@ -106,13 +108,28 @@ class _AddProductPageState extends State<AddProductPage> {
                     if (value == null || value.isEmpty) {
                       return 'Please enter a price';
                     }
-                    final price = double.tryParse(value);
-                    if (price == null || price <= 0) {
-                      return 'Please enter a valid positive price';
+                    if (int.tryParse(value) == null || int.parse(value) <= 0) {
+                      return 'Price must be a positive number';
                     }
                     return null;
                   },
                 ),
+
+                TextFormField(
+                  controller: _stockController,
+                  decoration: const InputDecoration(labelText: 'Stock'),
+                  keyboardType: TextInputType.number,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter stock';
+                    }
+                    if (int.tryParse(value) == null || int.parse(value) < 0) {
+                      return 'Stock must be a non-negative number';
+                    }
+                    return null;
+                  },
+                ),
+
                 TextFormField(
                   controller: _descriptionController,
                   decoration: const InputDecoration(labelText: 'Description'),
@@ -127,6 +144,7 @@ class _AddProductPageState extends State<AddProductPage> {
                     return null;
                   },
                 ),
+
                 TextFormField(
                   controller: _thumbnailController,
                   decoration: const InputDecoration(labelText: 'Thumbnail URL'),
@@ -136,11 +154,12 @@ class _AddProductPageState extends State<AddProductPage> {
                     }
                     final uri = Uri.tryParse(value);
                     if (uri == null || !uri.hasScheme || !uri.hasAuthority) {
-                      return 'Please enter a valid URL';
+                      return 'Invalid URL';
                     }
                     return null;
                   },
                 ),
+
                 TextFormField(
                   controller: _categoryController,
                   decoration: const InputDecoration(labelText: 'Category'),
@@ -151,16 +170,15 @@ class _AddProductPageState extends State<AddProductPage> {
                     return null;
                   },
                 ),
+
                 CheckboxListTile(
-                  title: const Text('Is Featured'),
+                  title: const Text("Featured Product"),
                   value: _isFeatured,
-                  onChanged: (bool? value) {
-                    setState(() {
-                      _isFeatured = value ?? false;
-                    });
-                  },
+                  onChanged: (v) => setState(() => _isFeatured = v ?? false),
                 ),
+
                 const SizedBox(height: 20),
+
                 ElevatedButton(
                   onPressed: _saveProduct,
                   child: const Text('Save'),

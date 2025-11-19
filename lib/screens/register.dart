@@ -115,33 +115,50 @@ class _RegisterPageState extends State<RegisterPage> {
                       String password1 = _passwordController.text;
                       String password2 = _confirmPasswordController.text;
 
-                      // Check credentials
-                      // TODO: Change the URL and don't forget to add trailing slash (/) at the end of URL!
-                      // To connect Android emulator with Django on localhost, use URL http://10.0.2.2/
-                      // If you using chrome,  use URL http://localhost:8000       
-                      final response = await request.postJson(
-                          "http://10.0.2.2:8000/auth/register/",
-                          jsonEncode({
-                            "username": username,
-                            "password1": password1,
-                            "password2": password2,
-                          }));
-                      if (context.mounted) {
-                        if (response['status'] == 'success') {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Successfully registered!'),
-                            ),
-                          );
-                          Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => const LoginPage()),
-                          );
-                        } else {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Failed to register!'),
+                      try {
+                        // Check credentials
+                        final response = await request.postJson(
+                            "http://127.0.0.1:8000/auth/register/",
+                            jsonEncode({
+                              "username": username,
+                              "password1": password1,
+                              "password2": password2,
+                            }));
+                        if (context.mounted) {
+                          if (response['status'] == 'success') {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Successfully registered!'),
+                              ),
+                            );
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => const LoginPage()),
+                            );
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Failed to register!'),
+                              ),
+                            );
+                          }
+                        }
+                      } catch (e) {
+                        if (context.mounted) {
+                          showDialog(
+                            context: context,
+                            builder: (context) => AlertDialog(
+                              title: const Text('Error'),
+                              content: Text('An error occurred: $e'),
+                              actions: [
+                                TextButton(
+                                  child: const Text('OK'),
+                                  onPressed: () {
+                                    Navigator.pop(context);
+                                  },
+                                ),
+                              ],
                             ),
                           );
                         }

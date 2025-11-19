@@ -3,6 +3,7 @@ import 'package:football_shop/screens/menu.dart';
 import 'package:football_shop/screens/newslist_form.dart';
 import 'package:football_shop/screens/news_entry_list.dart';
 import 'package:football_shop/add_product_page.dart';
+import 'package:football_shop/screens/products_list.dart';
 
 class LeftDrawer extends StatelessWidget {
   const LeftDrawer({super.key});
@@ -14,7 +15,7 @@ class LeftDrawer extends StatelessWidget {
         children: [
           const DrawerHeader(
             decoration: BoxDecoration(
-              color: Colors.blue,
+              color: Colors.green,
             ),
             child: Column(
               children: [
@@ -52,25 +53,25 @@ class LeftDrawer extends StatelessWidget {
             },
           ),
           ListTile(
-            leading: const Icon(Icons.post_add),
-            title: const Text('Add News'),
-            // Bagian redirection ke NewsFormPage
+            leading: const Icon(Icons.add_shopping_cart),
+            title: const Text('Add Item'),
+            // Bagian redirection ke AddProductPage
             onTap: () {
               Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => const NewsFormPage(),
+                    builder: (context) => const AddProductPage(),
                   ));
             },
           ),
           ListTile(
-            leading: const Icon(Icons.add_reaction_rounded),
-            title: const Text('News List'),
+            leading: const Icon(Icons.list),
+            title: const Text('Item List'),
             onTap: () {
-                // Route to news list page
+                // Route to products list page
                 Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => const NewsEntryListPage()),
+                    MaterialPageRoute(builder: (context) => const ProductsListPage()),
                 );
             },
           ),

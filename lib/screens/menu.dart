@@ -28,19 +28,39 @@ class ItemCard extends StatefulWidget {
 class _ItemCardState extends State<ItemCard> {
   void _logout(BuildContext context) async {
     final request = context.read<CookieRequest>();
-    final response = await request.logout("http://10.0.2.2:8000/auth/logout/");
-    if (context.mounted) {
-      if (response['status'] == 'success') {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Successfully logged out!')),
-        );
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const LoginPage()),
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Failed to logout!')),
+    try {
+      final response = await request.postJson("http://127.0.0.1:8000/auth/logout/", "{}");
+      if (context.mounted) {
+        if (response['status'] == 'success') {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Successfully logged out!')),
+          );
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const LoginPage()),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Failed to logout!')),
+          );
+        }
+      }
+    } catch (e) {
+      if (context.mounted) {
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Error'),
+            content: Text('An error occurred: $e'),
+            actions: [
+              TextButton(
+                child: const Text('OK'),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+              ),
+            ],
+          ),
         );
       }
     }
@@ -49,20 +69,20 @@ class _ItemCardState extends State<ItemCard> {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Theme.of(context).colorScheme.secondary,
+      color: Colors.green,
       borderRadius: BorderRadius.circular(12),
       child: InkWell(
         onTap: () {
           // Handle navigation based on item
-          if (widget.item.name == "See Football News") {
+          if (widget.item.name == "Browse Shop") {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => const NewsEntryListPage()),
+              MaterialPageRoute(builder: (context) => const ProductsListPage()),
             );
-          } else if (widget.item.name == "Add News") {
+          } else if (widget.item.name == "Add Item") {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => const NewsFormPage()),
+              MaterialPageRoute(builder: (context) => const AddProductPage()),
             );
           } else if (widget.item.name == "Logout") {
             // Handle logout
@@ -103,8 +123,8 @@ class FootballShopHome extends StatelessWidget {
     final String kelas = "C"; //kelas
 
     final List<ItemHomepage> items = [
-    ItemHomepage("See Football News", Icons.newspaper),
-    ItemHomepage("Add News", Icons.add),
+    ItemHomepage("Browse Shop", Icons.shop),
+    ItemHomepage("Add Item", Icons.add_shopping_cart),
     ItemHomepage("Logout", Icons.logout),
   ];
   
@@ -188,7 +208,7 @@ class FootballShopHome extends StatelessWidget {
                       );
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue,
+                      backgroundColor: Colors.green,
                       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                     ),
                     child: const Row(
@@ -210,7 +230,7 @@ class FootballShopHome extends StatelessWidget {
                       );
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green,
+                      backgroundColor: Colors.blue,
                       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                     ),
                     child: const Row(

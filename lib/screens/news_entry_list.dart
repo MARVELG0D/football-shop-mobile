@@ -19,7 +19,7 @@ class _NewsEntryListPageState extends State<NewsEntryListPage> {
     // To connect Android emulator with Django on localhost, use URL http://10.0.2.2/
     // If you using chrome,  use URL http://localhost:8000
     
-    final response = await request.get('http://10.0.2.2:8000/news/json/');
+    final response = await request.get('http://127.0.0.1:8000/news/json/');
     
     // Decode response to json format
     var data = response;
